@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" " http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="nju.yufan.webstore.order.dao.OrderDao">
+    <resultMap id="orderVo" type="nju.yufan.webstore.order.vo.OrderVo">
+        <id column="id" property="oid"/>
+        <collection property="items" ofType="orderItem">
+            <id property="id" column="iid"/>
+        </collection>
+    </resultMap>
+    <resultMap id="o" type="order">
+        <id column="id" property="oid"/>
+        <collection property="items" ofType="orderItem">
+            <id property="id" column="iid"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="o2" type="order">
+        <id column="id" property="oid"/>
+    </resultMap>
+
+    <select id="getOrders" resultMap="o">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, status, arrive_time, receive_time, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.userid = #{userid} order by o.time desc
+    </select>
+
+    <select id="getOrders2" resultMap="o">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, status, arrive_time, receive_time, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.storeid = #{storeid} order by o.time desc
+    </select>
+
+
+    <select id="getOrders4TimerTask" resultType="order">
+        select * from orders where status in (1,4,5)
+    </select>
+
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="nju.yufan.webstore.order.vo.OrderVo">
+        insert into orders(userid, storeid, addressid, money) values (#{userid}, #{storeid}, #{addressid}, #{money})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into orders(userid, storeid, addressid, money) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userid}, #{item.storeid}, #{item.addressid}, #{item.money})
+        </foreach>
+    </insert>
+
+    <insert id="insertItems"  parameterType="java.util.List">
+        insert into order_items(orderid, spuid, skuid, price, number) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderid}, #{item.spuid}, #{item.skuid}, #{item.price}, #{item.number},)
+        </foreach>
+    </insert>
+
+    <insert id="insertAfterSale" parameterType="afterSale">
+        insert into after_sale(order_item_id, reason, express, finished) values
+        (#{orderItemId}, #{reason}, #{express}, #{finished})
+    </insert>
+
+    <update id="receiveReturn">
+        update after_sale set finished = 1 where order_item_id = #{orderItemId}
+    </update>
+
+    <update id="update" parameterType="order">
+        update orders set
+        status = #{status},
+        arrive_time = #{arriveTime},
+        receive_time = #{receiveTime}
+        where id = #{id}
+    </update>
+
+    <select id="getWholeById" resultMap="o">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, status, arrive_time, receive_time, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.id = #{oid}
+    </select>
+
+    <select id="getOrder" resultType="order">
+        select id, userid, storeid, money, status from orders where oid = #{oid}
+    </select>
+
+    <select id="getByOrderItemId" resultMap="o2">
+        select o.id as oid, userid, storeid, money, status
+        from orders o inner join order_items i on o.id = i.orderid
+        where i.id = #{arg0}
+    </select>
+
+    <select id="getAfterSale" resultType="afterSale">
+        select * from after_sale where order_item_id = #{arg0}
+    </select>
+
+
+    <select id="getOrdersOfUser" resultMap="orderVo">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.userid = #{userid} and o.status = 6 order by o.time desc
+    </select>
+
+    <select id="getOrdersOfUserByTime" resultMap="orderVo">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.userid = #{arg0} and o.status = 6 and  time between #{arg1} and #{arg2} order by o.time desc
+    </select>
+
+    <select id="getOrdersOfStore" resultMap="orderVo">
+        select
+        o.id as oid, userid, storeid, time, money, addressid, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.storeid = #{storeid} and o.status = 6 order by time desc
+    </select>
+
+    <select id="getOrdersOfStoreByTime" resultMap="orderVo">
+        select
+        o.id as oid, userid, storeid, time, money, status, addressid, i.id as iid, orderid, spuid, skuid, price, number
+        from orders o inner join order_items i on o.id = i.orderid
+        where o.storeid = #{arg0} and o.status = 6 and  time between #{arg1} and #{arg2} order by o.time desc
+    </select>
+</mapper>

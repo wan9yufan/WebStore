@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/webstore?allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: mymysql
+  application:
+    name: comment
+  resources:
+    static-locations: classpath:/static/css,classpath:/static/img,classpath:/static/js,classpath:/static/html
+
+mybatis:
+  type-aliases-package: nju.yufan.webstore.comment.entity
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    auto-mapping-behavior: full
+
+server:
+  port: 8025
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: 192.168.47.228:8025
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.47.228:1111/eureka/
+
+feign:
+  hystrix:
+    enabled: true

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" " http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="nju.yufan.webstore.comment.dao.CommentDao">
+    <resultMap id="orderItemsWithComments" type="nju.yufan.webstore.comment.model.OrderItemWithComments">
+        <id property="id" column="iid"/>
+        <result property="time" column="o_time"/>
+        <collection property="comments" ofType="comment">
+            <id property="id" column="cid"/>
+            <result property="time" column="c_time"/>
+            <collection property="imgs" ofType="CommentImg">
+                <id property="id" column="imgid"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <insert id="insert" parameterType="comment">
+        insert into comments(order_item_id, comment) values (#{orderItemId},#{comment})
+    </insert>
+
+    <update id="reply">
+        update comments set reply = #{arg1} where id = #{arg0}
+    </update>
+
+    <insert id="insertImgs" parameterType="java.util.List">
+        insert into comment_imgs(comment_id, url) values
+        <foreach collection="list" separator="," item="img">
+            (#{commentId}, #{url})
+        </foreach>
+    </insert>
+
+
+    <select id="getCommentsOfSPU" resultMap="orderItemsWithComments">
+        select items.id as iid,userid, skuid, c.id as cid,comment, reply, o.time as o_time, c.time as c_time,imgs.id as imgid, url
+        from order_items as items inner join comments as c on items.id = c.order_item_id
+        inner join comment_imgs as imgs on c.id = imgs.comment_id
+        inner join orders as o on o.id = items.orderid
+        where items.spuid = #{arg0}
+    </select>
+
+    <select id="getAverageScoreOfSPU">
+        select avg(score) from order_items where spuid=#{spuid}
+    </select>
+
+    <select id="getGoodsScoreOfStore">
+        select avg(score) from order_items as i inner join orders as o on o.id = i.orderid
+        where o.storeid = #{storeid}
+    </select>
+
+    <select id="getServiceScoreOfStore">
+        select avg(service_score) from orders where o.storeid = #{storeid}
+    </select>
+
+    <select id="getTransportScoreOfStore">
+        select avg(transport_score) from orders where o.storeid = #{storeid}
+    </select>
+
+    <update id="rateOrder">
+        update orders set service_score = #{arg1}, transport_score = #{arg1}, commented = 1 where id = #{arg0}
+    </update>
+
+    <update id="rateOrderItem">
+        update order_items set score = #{arg1} where id = #{arg0}
+    </update>
+</mapper>

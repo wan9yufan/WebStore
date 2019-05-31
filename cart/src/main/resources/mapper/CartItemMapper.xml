@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" " http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="nju.yufan.webstore.cart.dao.CartItemDao">
+    <insert id="insert" parameterType="cartItem" useGeneratedKeys="true" keyProperty="id">
+        insert into cart_items(userid, storeid, skuid, number) values (#{userid}, #{storeid}, #{skuid}, #{number})
+    </insert>
+    <update id="changeQuantity">
+        update cart_items set number = #{arg1} where id = #{arg0}
+    </update>
+    <delete id="delete">
+        delete from cart_items where id = #{id}
+    </delete>
+    <select id="getCartItems" resultType="cartItem">
+        select * from cart_items where userid = #{userid}
+    </select>
+</mapper>
