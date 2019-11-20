@@ -39,18 +39,18 @@ spring:
         - id: goods-service
             uri: lb://goods-service
             predicates:
-              - Path=/goods/**
+              - Path=/goods-service/**
             filters:
               - StripPrefix=1
         - id: userservice
             uri: lb://userservice
             predicates:
-              - Path=/user/**
+              - Path=/userservice/**
             filters:
               - StripPrefix=1
         - id: storeservice
             uri: lb://storeservice
             predicates:
-              - Path=/store/**
+              - Path=/storeservice/**
             filters:
               - StripPrefix=1
